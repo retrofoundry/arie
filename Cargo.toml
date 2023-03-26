@@ -1,0 +1,21 @@
+[package]
+name = "arie"
+version = "0.2.0"
+description = "Library for audio output from generated buffers"
+homepage = "https://crates.io/crates/arie"
+repository = "https://github.com/retrofoundry/arie"
+keywords = ["audio", "retro", "buffer"]
+readme = "README.md"
+edition = "2021"
+license-file = "LICENSE"
+
+[lib]
+name = "arie"
+crate-type = ["staticlib", "cdylib", "lib"]
+
+[dependencies]
+anyhow = "1.0.70"
+byteorder = "1.4.3"
+cpal = "0.15.2"
+ringbuf = "0.3.3"
+rubato = "0.14.0"
