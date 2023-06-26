@@ -1,0 +1,58 @@
+name: validate
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:    
+  rustfmt-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Update apt
+      run: sudo apt update
+    - name: Install dependencies
+      run: |
+        sudo apt-get install libasound2-dev
+    - name: Run cargo fmt
+      run: cargo fmt --all -- --check
+    - name: Run cargo clippy
+      run: cargo clippy --all --
+  macos-check:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Test
+      run: cargo test --all-features
+  ubuntu-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Update apt
+      run: sudo apt update
+    - name: Install dependencies
+      run: |
+        sudo apt-get install libasound2-dev libjack-jackd2-dev libjack-jackd2-0
+    - name: Setup Audio Device
+      run: |
+        sudo jackd2 -d dummy &
+    - name: Test
+      run: cargo test --all-features
+  windows-check:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Scream
+      shell: powershell
+      run: |
+        Invoke-WebRequest https://github.com/duncanthrax/scream/releases/download/3.8/Scream3.8.zip -OutFile Scream3.8.zip
+        Expand-Archive -Path Scream3.8.zip -DestinationPath Scream
+        Import-Certificate -FilePath Scream\Install\driver\x64\Scream.cat -CertStoreLocation Cert:\LocalMachine\TrustedPublisher 
+        Scream\Install\helpers\devcon-x64.exe install Scream\Install\driver\x64\Scream.inf *Scream
+    - name: Start Audio Service
+      run: net start audiosrv
+    - name: Test
+      run: cargo test --all-features
