@@ -35,7 +35,10 @@ jobs:
       run: sudo apt update
     - name: Install dependencies
       run: |
-        sudo apt-get install libasound2-dev
+        sudo apt-get install libasound2-dev libjack-jackd2-dev libjack-jackd2-0
+    - name: Setup Audio Device
+      run: |
+        sudo jackd2 -d dummy &
     - name: Test
       run: cargo test --all-features
   windows-check:
