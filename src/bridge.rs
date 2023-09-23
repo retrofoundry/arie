@@ -76,7 +76,7 @@ pub extern "C" fn AudioPlayerQueueBuffer(
     match player {
         Some(player) => {
             let buffer = unsafe { std::slice::from_raw_parts(buf, len) };
-            player.queue_buffer(buffer);
+            player.queue_buffer_u8(buffer);
         }
         None => {
             eprintln!("[Audio] failed to play audio buffer: was given an invalid instance pointer")

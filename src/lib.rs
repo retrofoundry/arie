@@ -145,7 +145,20 @@ impl AudioPlayer {
         self.output_stream.pause().unwrap();
     }
 
-    pub fn queue_buffer(&mut self, buffer: &[u8]) {
+    /// Queue a buffer of samples to be played
+    pub fn queue_buffer_u8(&mut self, buffer: &[u8]) {
+        // transform the buffer into a vector of f32 samples
+        // buffer data is of 2 channels, 16 bit samples
+        let samples = buffer
+            .chunks(2)
+            .map(|b| i16::from_le_bytes([b[0], b[1]]) as f32 / 32768.0)
+            .collect::<Vec<_>>();
+
+        self.queue_buffer(&samples);
+    }
+
+    /// Queue a buffer of samples to be played
+    pub fn queue_buffer(&mut self, buffer: &[f32]) {
         // helper method to split channels into separate vectors
         fn read_frames(inbuffer: &[f32], n_frames: usize, outputs: &mut [Vec<f32>]) {
             for output in outputs.iter_mut() {
@@ -172,15 +185,8 @@ impl AudioPlayer {
             }
         }
 
-        // transform the buffer into a vector of f32 samples
-        // buffer data is of 2 channels, 16 bit samples
-        let samples = buffer
-            .chunks(2)
-            .map(|b| i16::from_le_bytes([b[0], b[1]]) as f32 / 32768.0)
-            .collect::<Vec<_>>();
-
         if let Some(resampler) = &mut self.resampler {
-            self.pre_resampled_buffer.extend_from_slice(&samples);
+            self.pre_resampled_buffer.extend_from_slice(&buffer);
 
             loop {
                 let frames = resampler.input_frames_next();
@@ -223,7 +229,7 @@ impl AudioPlayer {
                 self.pre_resampled_buffer = self.pre_resampled_buffer.split_off(frames * 2);
             }
         } else {
-            self.buffer_producer.push_slice(&samples);
+            self.buffer_producer.push_slice(&buffer);
         }
     }
 
