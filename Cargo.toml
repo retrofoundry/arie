@@ -1,6 +1,6 @@
 [package]
 name = "arie"
-version = "0.2.0"
+version = "0.2.1"
 description = "Library for audio output from generated buffers"
 homepage = "https://crates.io/crates/arie"
 repository = "https://github.com/retrofoundry/arie"
